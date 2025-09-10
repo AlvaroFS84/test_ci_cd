@@ -14,31 +14,31 @@ pipeline {
         
         stage('Install Dependencies') {
             steps {
-                sh 'composer install --no-progress --prefer-dist --optimize-autoloader'
+                sh 'docker exec test_ci_cd-php-1 composer install --no-progress --prefer-dist --optimize-autoloader'
             }
         }
         
         stage('PHP Syntax Check') {
             steps {
-                sh 'find src tests -name "*.php" -exec php -l {} \\;'
+                sh 'docker exec test_ci_cd-php-1 find src tests -name "*.php" -exec php -l {} \\;'
             }
         }
         
         stage('Run Tests') {
             steps {
-                sh 'php bin/phpunit --coverage-text --coverage-clover=coverage.xml'
+                sh 'docker exec test_ci_cd-php-1 php bin/phpunit --coverage-text --coverage-clover=coverage.xml'
             }
             post {
                 always {
-                    publishTestResults testResultsPattern: 'coverage.xml'
-                    publishHTML([
-                        allowMissing: false,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: 'coverage',
-                        reportFiles: 'index.html',
-                        reportName: 'Coverage Report'
-                    ])
+                    // Copy coverage file from container to Jenkins workspace
+                    sh 'docker cp test_ci_cd-php-1:/var/www/html/coverage.xml ./coverage.xml || true'
+                    
+                    // Publish test results if coverage.xml exists
+                    script {
+                        if (fileExists('coverage.xml')) {
+                            publishTestResults testResultsPattern: 'coverage.xml'
+                        }
+                    }
                 }
             }
         }
