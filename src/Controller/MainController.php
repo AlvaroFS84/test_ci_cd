@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Service\CalculatorService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
@@ -9,6 +10,11 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class MainController extends AbstractController
 {
+    public function __construct(
+        private readonly CalculatorService $calculator
+    ) {
+    }
+
     #[Route('/sum/{a}/{b}', name: 'sum', methods: ['GET'])]
     public function sum(string $a, string $b): Response
     {
@@ -16,7 +22,7 @@ class MainController extends AbstractController
             return $this->json(['error' => 'Los parámetros deben ser numéricos'], 400);
         }
 
-        $result = (float) $a + (float) $b;
+        $result = $this->calculator->sum((float) $a, (float) $b);
 
         return $this->json([
             'operation' => 'sum',
@@ -33,7 +39,7 @@ class MainController extends AbstractController
             return $this->json(['error' => 'Los parámetros deben ser numéricos'], 400);
         }
 
-        $result = (float) $a * (float) $b;
+        $result = $this->calculator->multiply((float) $a, (float) $b);
 
         return $this->json([
             'operation' => 'multiply',
@@ -58,7 +64,7 @@ class MainController extends AbstractController
             return $this->json(['error' => 'Los parámetros deben ser numéricos'], 400);
         }
 
-        $result = (float) $a + (float) $b;
+        $result = $this->calculator->sum((float) $a, (float) $b);
 
         return $this->json([
             'operation' => 'sum',
@@ -83,7 +89,7 @@ class MainController extends AbstractController
             return $this->json(['error' => 'Los parámetros deben ser numéricos'], 400);
         }
 
-        $result = (float) $a * (float) $b;
+        $result = $this->calculator->multiply((float) $a, (float) $b);
 
         return $this->json([
             'operation' => 'multiply',
