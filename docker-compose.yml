@@ -42,6 +42,12 @@ services:
     environment:
       - JENKINS_OPTS=--httpPort=8080
     restart: unless-stopped
+    command: >
+      bash -c "
+        apt-get update &&
+        apt-get install -y docker.io &&
+        /usr/bin/tini -- /usr/local/bin/jenkins.sh
+      "
 
 volumes:
   jenkins_home:
